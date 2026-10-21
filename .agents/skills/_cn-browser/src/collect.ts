@@ -21,6 +21,7 @@ export function toQuery(adapter: PortalAdapter, opts: SearchCommandOpts): Search
     query: opts.query.trim(),
     location: opts.location?.trim() || undefined,
     salary: opts.salary?.trim() || undefined,
+    includeUnknownSalary: opts.includeUnknownSalary || undefined,
     experience: opts.experience?.trim() || undefined,
     jobage: opts.jobage,
     page: opts.page,

@@ -9,7 +9,25 @@ export const MAX_PAGE = 3
 export const MIN_DELAY_MS = 2500
 export const MAX_DELAY_MS = 7000
 
-export const LOGIN_MARKERS = ["扫码登录", "请登录", "登录后查看", "请先登录"]
+export const LOGIN_MARKERS = ["扫码登录", "请登录", "登录后查看", "请先登录", "登录/注册"]
+
+/** Visible copy that means the browser is past the login wall. */
+export const LOGGED_IN_MARKERS = ["退出登录", "退出", "我的简历", "个人中心", "我的猎聘"]
+
+/**
+ * Enter alone is not a login. The marker is written only when the page shows
+ * a logged-in session and is not sitting on a captcha or a login wall.
+ */
+export function sessionLooksLoggedIn(
+  text: string,
+  challengeMarkers: string[],
+): "ok" | "CHALLENGE_REQUIRED" | "LOGIN_REQUIRED" {
+  if (challengeMarkers.some((marker) => marker && text.includes(marker))) return "CHALLENGE_REQUIRED"
+  const loginWall = LOGIN_MARKERS.some((marker) => text.includes(marker))
+  const signedIn = LOGGED_IN_MARKERS.some((marker) => text.includes(marker))
+  if (signedIn && !loginWall) return "ok"
+  return "LOGIN_REQUIRED"
+}
 
 export function assertLimit(limit: number): number {
   if (!Number.isInteger(limit) || limit < 1) {

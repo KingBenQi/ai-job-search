@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { pathToFileURL } from "node:url"
 
-import { classifyEmpty, delayMs, emptyMessage, sleep } from "./limits.js"
+import { classifyEmpty, delayMs, emptyMessage, sessionLooksLoggedIn, sleep } from "./limits.js"
 import { hasLoginMarker, loginMarkerPath, playwrightModulePath, profileDir } from "./paths.js"
 import { PortalError, type PortalAdapter, type SearchQuery } from "./types.js"
 
@@ -14,7 +14,10 @@ interface PwPage {
   goto(url: string, options?: { waitUntil?: string; timeout?: number }): Promise<unknown>
   content(): Promise<string>
   on(event: "response", handler: (response: PwResponse) => void): void
-  waitForTimeout(ms: number): Promise<void>
+  waitForResponse(
+    predicate: (response: PwResponse) => boolean | Promise<boolean>,
+    options?: { timeout?: number },
+  ): Promise<PwResponse>
 }
 
 interface PwContext {
@@ -60,23 +63,39 @@ async function openContext(portalId: string, headless: boolean): Promise<PwConte
   })
 }
 
-async function readPage(page: PwPage, url: string, hints: string[], delay: () => number): Promise<string[]> {
-  const bodies: string[] = []
+/**
+ * Read the HTML snapshot and every hinted XHR body.
+ * `response.text()` is awaited. A fixed sleep is not the synchronization.
+ */
+export async function readPagePayloads(page: PwPage, url: string, hints: string[], delay: () => number): Promise<string[]> {
+  const reads: Promise<string | null>[] = []
+  const matches = (response: PwResponse) => hints.some((hint) => response.url().includes(hint))
   page.on("response", (response) => {
-    const responseUrl = response.url()
-    if (!hints.some((hint) => responseUrl.includes(hint))) return
-    response.text().then(
-      (body) => {
-        if (body) bodies.push(body)
-      },
-      () => {
-        /* a failed body is ignored; the HTML snapshot is the fallback */
-      },
+    if (!matches(response)) return
+    reads.push(
+      response.text().then(
+        (body) => (body ? body : null),
+        () => null,
+      ),
     )
   })
   await sleep(delay())
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 })
-  await page.waitForTimeout(1500)
+  const navigation = page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 })
+  const firstMatch = page.waitForResponse((response) => matches(response), { timeout: 15000 }).then(
+    () => true,
+    () => false,
+  )
+  await navigation
+  await firstMatch
+  const bodies: string[] = []
+  let spins = 0
+  while (reads.length > 0 && spins < 20) {
+    const batch = reads.splice(0, reads.length)
+    for (const body of await Promise.all(batch)) {
+      if (body) bodies.push(body)
+    }
+    spins++
+  }
   const html = await page.content()
   return [html, ...bodies]
 }
@@ -122,13 +141,17 @@ export async function loginInteractive(adapter: PortalAdapter): Promise<void> {
   try {
     const page = await context.newPage()
     process.stdout.write(
-      `A browser window is opening ${adapter.homeUrl}.\nScan the QR code or sign in yourself. This command never types a password and never solves a captcha.\nPress Enter here after you are logged in.\n`,
+      `A browser window is opening ${adapter.homeUrl}.\nScan the QR code or sign in yourself. This command never types a password and never solves a captcha.\nPress Enter here after the page shows you are logged in (退出 or 我的简历). Enter alone does not save a session.\n`,
     )
     await page.goto(adapter.homeUrl, { waitUntil: "domcontentloaded", timeout: 45000 })
     await new Promise<void>((resolve) => {
       process.stdin.setEncoding("utf8")
       process.stdin.once("data", () => resolve())
     })
+    const verdict = sessionLooksLoggedIn(await page.content(), adapter.challengeMarkers)
+    if (verdict !== "ok") {
+      throw new PortalError(emptyMessage(verdict), verdict)
+    }
     mkdirSync(profileDir(adapter.id), { recursive: true })
     writeFileSync(loginMarkerPath(adapter.id), `${new Date().toISOString()}\n`, "utf8")
   } finally {
@@ -146,7 +169,7 @@ export async function captureSearch(
   const context = await openContext(adapter.id, opts.headless)
   try {
     const page = await context.newPage()
-    const payloads = await readPage(page, adapter.searchPageUrl(query), adapter.responseUrlHints, opts.delay ?? delayMs)
+    const payloads = await readPagePayloads(page, adapter.searchPageUrl(query), adapter.responseUrlHints, opts.delay ?? delayMs)
     return assertHuman(payloads, adapter, parsedCount)
   } finally {
     await context.close()
@@ -163,7 +186,7 @@ export async function captureDetail(
   const context = await openContext(adapter.id, opts.headless)
   try {
     const page = await context.newPage()
-    const payloads = await readPage(page, url, adapter.responseUrlHints, opts.delay ?? delayMs)
+    const payloads = await readPagePayloads(page, url, adapter.responseUrlHints, opts.delay ?? delayMs)
     return assertHuman(payloads, adapter, parsedCount)
   } finally {
     await context.close()

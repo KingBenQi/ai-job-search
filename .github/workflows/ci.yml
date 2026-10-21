@@ -170,6 +170,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
             texlive-luatex texlive-latex-extra texlive-xetex \
+            texlive-lang-chinese \
             texlive-fonts-extra texlive-fonts-recommended \
             poppler-utils python3
       - name: Install PDF inspection tools
@@ -196,6 +197,24 @@ jobs:
           if grep -q '^!' cover_example.log; then
             echo '::error::xelatex reported errors compiling cover_letters/cover_example.tex'
             grep -A3 '^!' cover_example.log
+            exit 1
+          fi
+      - name: Compile Chinese CV and cover letter (xelatex)
+        run: |
+          cd cv
+          xelatex -interaction=nonstopmode -halt-on-error main_zh_example.tex
+          test -f main_zh_example.pdf
+          if grep -q '^!' main_zh_example.log; then
+            echo '::error::xelatex reported errors compiling cv/main_zh_example.tex'
+            grep -A3 '^!' main_zh_example.log
+            exit 1
+          fi
+          cd ../cover_letters
+          xelatex -interaction=nonstopmode -halt-on-error cover_zh_example.tex
+          test -f cover_zh_example.pdf
+          if grep -q '^!' cover_zh_example.log; then
+            echo '::error::xelatex reported errors compiling cover_letters/cover_zh_example.tex'
+            grep -A3 '^!' cover_zh_example.log
             exit 1
           fi
       - name: Verify extractable PDF text

@@ -47,7 +47,7 @@ Flags match `zhipin-search`: `--query`/`-q`, `--location`/`-l`, `--salary`,
 0-indexed and the CLI converts), `--limit`/`-n` (hard cap 20), `--fixture`,
 `--format json|table|plain`, `--headless`.
 
-Salary is filtered on the parsed cards (`25-40k` overlaps `--salary 20-40`).
+Salary is filtered on the parsed cards (`25-40k` overlaps `--salary 20-40`). Amounts are monthly CNY: `万/年` is divided by 12, `元/天` uses 21.75 pay-days, and `·N薪` scales by N/12. `--include-unknown-salary` keeps `面议` and unparsed salaries when a salary filter is set.
 City codes are listed in `url-reference.md` and are unverified against a live session.
 
 ### Detail

@@ -67,6 +67,12 @@ class ChinesePortalWorkflowTests(unittest.TestCase):
         self.assertIn("验证码", readme)
         self.assertIn("JiemsLBJ/offer-harvester", readme)
         self.assertIn("profile.local/", readme)
+        self.assertIn(".claude/commands/scrape.md", readme)
+        self.assertTrue((REPO / ".claude/commands/scrape.md").is_file())
+        ci = (REPO / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertIn("main_zh_example.tex", ci)
+        self.assertIn("cover_zh_example.tex", ci)
+        self.assertIn("texlive-lang-chinese", ci)
         confirm = (REPO / ".agents/skills/_cn-browser/src/confirm.ts").read_text(encoding="utf-8")
         tracker = (REPO / ".agents/skills/_cn-browser/src/tracker.ts").read_text(encoding="utf-8")
         for source in (confirm, tracker):

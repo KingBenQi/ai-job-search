@@ -114,7 +114,7 @@ claude
 /scrape
 ```
 
-This searches multiple job portals for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly — or, when a scrape returns more jobs than you want to eyeball, run `/rank` to batch-score them all against the fit framework and get a ranked shortlist first.
+`/scrape` is `.claude/commands/scrape.md`. That command follows `.claude/skills/job-scraper/SKILL.md`: it searches the installed portal CLIs for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly — or, when a scrape returns more jobs than you want to eyeball, run `/rank` to batch-score them all against the fit framework and get a ranked shortlist first.
 
 ### 5. Apply to a job
 
@@ -328,12 +328,12 @@ bun run .agents/skills/zhipin-search/cli/src/cli.ts search -q "后端" -l "北�
 bun run .agents/skills/liepin-search/cli/src/cli.ts search -q "数据" -l "上海" --salary 20-40 --experience 3-5年
 ```
 
-`/scrape` discovers both skills. `/apply https://www.zhipin.com/job_detail/<id>.html` (or a liepin job URL) fetches the JD through the same session and, because the posting is Chinese, drafts a ctex resume, a ctex cover letter, and a short 打招呼语. Nothing is submitted for you.
+`/scrape` (`.claude/commands/scrape.md`) discovers both skills and runs their `search` commands. `/apply https://www.zhipin.com/job_detail/<id>.html` (or a liepin job URL) fetches the JD through the same session and, because the posting is Chinese, drafts a ctex resume, a ctex cover letter, and a short 打招呼语. Nothing is submitted for you.
 
 Limits, on purpose:
 
 - At most 20 results and 3 pages per command, with a few seconds between navigations.
-- Salary and experience are filtered on the parsed cards. City codes in the URL are a best-effort map and are marked unverified in each skill's `url-reference.md`.
+- Salary and experience are filtered on the parsed cards. Salary is monthly CNY (`万/年` ÷ 12, `元/天` × 21.75, `·N薪` scales by N/12). `面议` is dropped when `--salary` is set unless you pass `--include-unknown-salary`. City codes in the URL are a best-effort map and are marked unverified in each skill's `url-reference.md`.
 - A captcha or security check stops the command. There is no solver and no retry loop.
 - `greet` prints a draft. `--send` and `--batch` are refused. `--open <url>` shows that one page and waits for you to paste.
 - Selectors and XHR hints need a check against a logged-in browser; the fixtures are structural samples, not live page dumps. If a search returns empty or garbled fields, treat the parser as stale and update the fixture with the page you see.
@@ -364,7 +364,7 @@ bun run .agents/skills/liepin-search/cli/src/cli.ts login
 bun run .agents/skills/zhipin-search/cli/src/cli.ts search -q "后端" -l "北京" --salary 20-40 --experience 3-5年 --limit 10
 ```
 
-`/scrape` 会带上这两个门户。`/apply <职位 URL>` 拉取 JD；中文职位会自动用 ctex 模板生成中文简历、中文求职信，以及一段约 120 字的打招呼语。程序不会替你投递，也不会自动打招呼。`--send` 和 `--batch` 会直接拒绝。
+`/scrape`（`.claude/commands/scrape.md`）会带上这两个门户。`/apply <职位 URL>` 拉取 JD；中文职位会自动用 ctex 模板生成中文简历、中文求职信，以及一段约 120 字的打招呼语。程序不会替你投递，也不会自动打招呼。`--send` 和 `--batch` 会直接拒绝。
 
 限制：
 

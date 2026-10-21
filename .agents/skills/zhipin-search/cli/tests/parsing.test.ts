@@ -3,8 +3,9 @@ import { mkdtempSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { applyFilters, parseSalary } from "../../../_cn-browser/src/filters.js"
-import { classifyEmpty, delayMs } from "../../../_cn-browser/src/limits.js"
+import { applyFilters, experienceMatches, parseExperience, parseSalary } from "../../../_cn-browser/src/filters.js"
+import { readPagePayloads } from "../../../_cn-browser/src/browser.js"
+import { classifyEmpty, delayMs, sessionLooksLoggedIn } from "../../../_cn-browser/src/limits.js"
 import { hasClass } from "../../../_cn-browser/src/html.js"
 import { portalForHost, registerPortal } from "../../../_cn-browser/src/registry.js"
 import { confirmAccepted, renderConfirm } from "../../../_cn-browser/src/confirm.js"
@@ -183,8 +184,106 @@ describe("politeness", () => {
     expect(text).toContain("后端工程师")
     expect(text.length).toBeLessThanOrEqual(120)
     expect(() => assertNoSend({ send: true })).toThrow(PortalError)
-    expect(parseSalary("20-40K·15薪")?.min).toBe(20000)
+    const paid = parseSalary("20-40K·15薪")
+    expect(paid?.min).toBe(25000)
+    expect(paid?.max).toBe(50000)
+    expect(paid?.months).toBe(15)
     expect(zhipinAdapter.refusesSubmit).toBe(true)
+  })
+
+  test("salary units normalize to monthly CNY and unknown pay can be kept", () => {
+    expect(parseSalary("20-40")).toEqual({ min: 20000, max: 40000, negotiable: false, months: null })
+    expect(parseSalary("8-12K")?.min).toBe(8000)
+    expect(parseSalary("1.5-2万")).toEqual({ min: 15000, max: 20000, negotiable: false, months: null })
+    expect(parseSalary("10-20万/年")).toEqual({ min: 8333, max: 16667, negotiable: false, months: null })
+    expect(parseSalary("200-300元/天")).toEqual({ min: 4350, max: 6525, negotiable: false, months: null })
+    const open = parseSalary("25K以上")
+    expect(open?.min).toBe(25000)
+    expect(open?.max).toBeNull()
+    expect(parseSalary("15K以下")?.max).toBe(15000)
+    expect(parseSalary("面议")?.negotiable).toBe(true)
+    expect(parseSalary("薪资待定")).toBeNull()
+
+    const base = {
+      title: "工程师",
+      company: "示例",
+      location: "北京",
+      date: null,
+      url: "https://www.zhipin.com/job_detail/x.html",
+      experience: "3-5年",
+      education: null,
+      requirements: null,
+      description: null,
+    }
+    const jobs = [
+      { ...base, id: "ok", salary: "20-40K" },
+      { ...base, id: "talk", salary: "面议" },
+      { ...base, id: "odd", salary: "薪资待定" },
+      { ...base, id: "low", salary: "8-12K" },
+    ]
+    const query: SearchQuery = {
+      query: "后端",
+      salary: "20-40",
+      page: 1,
+      limit: 10,
+      warnings: [],
+    }
+    expect(applyFilters(jobs, query).map((job) => job.id)).toEqual(["ok"])
+    expect(applyFilters(jobs, { ...query, includeUnknownSalary: true }).map((job) => job.id)).toEqual([
+      "ok",
+      "talk",
+      "odd",
+    ])
+  })
+
+  test("experience labels cover open, campus, and year bounds", () => {
+    expect(parseExperience("经验不限")).toBe("any")
+    expect(experienceMatches("经验不限", "3-5年")).toBe(true)
+    expect(experienceMatches("5-10年", "经验不限")).toBe(true)
+    expect(parseExperience("应届")).toBe("graduate")
+    expect(parseExperience("在校生")).toBe("student")
+    expect(parseExperience("在校/应届")).toBe("early")
+    expect(experienceMatches("在校/应届", "应届")).toBe(true)
+    expect(experienceMatches("在校/应届", "在校")).toBe(true)
+    expect(experienceMatches("在校/应届", "3-5年")).toBe(false)
+    expect(experienceMatches("应届", "在校")).toBe(false)
+    expect(parseExperience("1年以内")).toEqual({ min: 0, max: 1 })
+    expect(parseExperience("10年以上")).toEqual({ min: 10, max: 99 })
+    expect(parseExperience("十年以上")).toEqual({ min: 10, max: 99 })
+  })
+
+  test("login marker requires a logged-in page, and response bodies are awaited", async () => {
+    expect(sessionLooksLoggedIn("请扫码登录", ["验证码"])).toBe("LOGIN_REQUIRED")
+    expect(sessionLooksLoggedIn("退出 我的简历", ["验证码"])).toBe("ok")
+    expect(sessionLooksLoggedIn("请完成验证码", ["验证码"])).toBe("CHALLENGE_REQUIRED")
+    expect(sessionLooksLoggedIn("首页", ["验证码"])).toBe("LOGIN_REQUIRED")
+
+    let settled = false
+    const page = {
+      on(_event: "response", handler: (response: { url: () => string; text: () => Promise<string> }) => void) {
+        handler({
+          url: () => "https://www.zhipin.com/wapi/zpgeek/search/joblist.json",
+          text: () =>
+            new Promise((resolve) => {
+              setTimeout(() => {
+                settled = true
+                resolve('{"zpData":{"jobList":[]}}')
+              }, 40)
+            }),
+        })
+      },
+      goto: async () => undefined,
+      content: async () => "<html>列表</html>",
+      waitForResponse: async (predicate: (response: { url: () => string }) => boolean) => {
+        const response = { url: () => "https://www.zhipin.com/wapi/zpgeek/search/joblist.json" }
+        if (!predicate(response)) throw new Error("hint miss")
+        return response
+      },
+    }
+    const payloads = await readPagePayloads(page, "https://www.zhipin.com/web/geek/job", ["joblist.json"], () => 0)
+    expect(settled).toBe(true)
+    expect(payloads[0]).toContain("列表")
+    expect(payloads[1]).toContain("jobList")
   })
 
   test("confirm accepts an explicit yes and a draft row stays drafted", () => {

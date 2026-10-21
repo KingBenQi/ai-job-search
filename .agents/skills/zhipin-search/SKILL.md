@@ -44,7 +44,8 @@ bun run .agents/skills/zhipin-search/cli/src/cli.ts search --query "后端" [fla
 
 - `--query` / `-q` — required keyword
 - `--location` / `-l` — city name (`北京`) or a city code. Unknown names are not guessed.
-- `--salary` — client-side overlap filter, e.g. `20-40` or `20-40K` (monthly, thousands of CNY)
+- `--salary` — client-side overlap filter in monthly CNY. `20-40` and `20-40K` are thousands per month. `万/年` is divided by 12, `元/天` uses 21.75 pay-days, and `·N薪` is stored and scales the monthly amount by N/12. `25K以上` and `15K以下` are open on one side.
+- `--include-unknown-salary` — when `--salary` is set, also keep `面议` and salaries the parser cannot read. Without this flag those cards are dropped.
 - `--experience` — e.g. `3-5年`, `应届`, `1-3年`. Also sent as a site code when the label is known (see `url-reference.md`; those codes are unverified live).
 - `--jobage <days>` — drop cards whose date is older than N days. Cards with no date are kept.
 - `--page <n>` — 1-indexed, hard cap 3

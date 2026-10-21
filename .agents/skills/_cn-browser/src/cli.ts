@@ -65,6 +65,7 @@ const SEARCH_FLAGS = new Set([
   "query",
   "location",
   "salary",
+  "include-unknown-salary",
   "experience",
   "jobage",
   "page",
@@ -111,7 +112,8 @@ USAGE
 SEARCH FLAGS
   --query, -q <text>       Keywords. Required.
   --location, -l <text>    City name (北京) or the portal's city code.
-  --salary <range>         Client-side filter, e.g. 20-40 or 20-40K. Not sent as a site code.
+  --salary <range>         Client-side filter, monthly CNY. 20-40 and 20-40K are thousands. 万/年 is /12. Not sent as a site code.
+  --include-unknown-salary Keep 面议 and unparsed salaries when --salary is set. Default drops them.
   --experience <text>      e.g. 3-5年, 应届, 5-10. Filtered on the parsed cards.
   --jobage <days>          Drop dated postings older than N days. Undated cards are kept.
   --page <n>               1-indexed. Hard cap 3. One page per command.
@@ -122,7 +124,8 @@ SEARCH FLAGS
 
 LOGIN
   Opens the site in a persistent profile and waits until you press Enter.
-  You scan the QR code. The command never types credentials.
+  You scan the QR code. The session file is written only after the page
+  shows a logged-in session. The command never types credentials.
 
 GREET
   Prints a short 打招呼 draft. --send and --batch are refused.
@@ -156,6 +159,7 @@ export async function runPortalCli(portal: PortalCli, argv: string[] = process.a
         query: flagString(flags, "query"),
         location: flagString(flags, "location"),
         salary: flagString(flags, "salary"),
+        includeUnknownSalary: flagBool(flags, "include-unknown-salary"),
         experience: flagString(flags, "experience"),
         jobage: optionalInt(flags, "jobage"),
         page: optionalInt(flags, "page") ?? 1,

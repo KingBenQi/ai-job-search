@@ -24,6 +24,11 @@ export interface SearchQuery {
   /** Resolved portal city code, when the map knows one. */
   cityCode?: string
   salary?: string
+  /**
+   * When a salary filter is set, keep `面议` and salaries the parser cannot
+   * read. Default is to drop them.
+   */
+  includeUnknownSalary?: boolean
   experience?: string
   /** Drop postings whose `date` is older than this many days. Null dates stay. */
   jobage?: number
@@ -37,6 +42,7 @@ export interface SearchCommandOpts {
   query?: string
   location?: string
   salary?: string
+  includeUnknownSalary?: boolean
   experience?: string
   jobage?: number
   page: number

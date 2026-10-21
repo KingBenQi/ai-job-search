@@ -71,8 +71,11 @@ cards are filtered by the name.
 | 10年以上 | 107 |
 
 Salary is **not** sent as a site code. `--salary 20-40` keeps cards whose
-monthly range overlaps that band (`20-40K` means 20–40 thousand CNY per
-month). `面议` does not match a numeric filter.
+monthly range overlaps that band. `20-40` and `20-40K` are 20–40 thousand CNY
+per month. `万/年` is divided by 12, `元/天` is multiplied by 21.75, and `·N薪`
+is stored and scales that monthly amount by N/12. `以上` and `以下` leave one
+end open. `面议` and unparsed text do not match a numeric filter unless
+`--include-unknown-salary` is set.
 
 ## Limits
 
