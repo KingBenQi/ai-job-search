@@ -45,8 +45,9 @@ Read the current state of these files and report whether each has content or is 
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md` *(contact line and signature inside the LaTeX template only — framework structure is preserved)*
 - `.claude/skills/job-application-assistant/07-interview-prep.md` *(STAR examples and STAR candidates sections only — framework structure is preserved)*
 - `.claude/skills/job-scraper/search-queries.md` *(role titles, domain keywords, and location terms only — query structure is preserved)*
+- `profile.local/` — the gitignored directory `/setup` actually writes. The whole directory will be deleted.
 
-This list must stay in step with what `/setup` Step 3 populates: every skill file it writes candidate data into is cleared here.
+This list must stay in step with what `/setup` Step 3 populates: every skill file it writes candidate data into is cleared here. `/setup` now writes the live copy under `profile.local/`. The tracked skill files below are restored to placeholders so an older setup that edited them does not leave personal data in git.
 
 Present as:
 
@@ -80,8 +81,10 @@ Present as:
 The following files are NOT touched (they contain framework rules, not candidate data):
   - 03-writing-style.md
 
-Outside the profile scope, still holding your personal data: CLAUDE.md and
-cv/main_example.tex. This scope covers skill files only.
+Tracked `CLAUDE.md` and `cv/main_example.tex` are templates. `/setup` writes the
+personal copies under `profile.local/`, which this reset deletes. If either
+tracked file still contains a real name from an older setup, restore the
+placeholders before you push. This command does not rewrite those two files.
 ```
 
 ### If scope includes `documents`:
@@ -142,6 +145,8 @@ Wait for the user's response.
 
 ### Profile reset
 
+Delete `profile.local/` if it exists (`rm -rf profile.local`). That directory is the live personal profile.
+
 Every skill file under `.claude/skills/job-application-assistant/` opens with a `---` frontmatter block carrying its `framework_version` marker. That marker is framework data, not candidate data: `tools/check_framework_version.py` fails a file without it, and `tools/check_upstream_updates.py` cannot compare the file against upstream. Never remove or rewrite it - the two full-file replacements below keep it and replace only what follows.
 
 **For `01-candidate-profile.md`**, keep the file's `---` frontmatter block exactly as it is and replace everything below it with:
@@ -157,6 +162,15 @@ Every skill file under `.claude/skills/job-application-assistant/` opens with a 
 
 | Language | Level | Notes |
 |----------|-------|-------|
+
+## Job Search Preferences
+
+- **期望城市:** [YOUR_EXPECTED_CITIES]
+- **期望薪资:** [YOUR_EXPECTED_SALARY]
+- **到岗时间:** [YOUR_AVAILABILITY]
+- **学历:** [YOUR_HIGHEST_DEGREE]
+- **工作年限:** [YOUR_YEARS_OF_EXPERIENCE]
+- **求职状态:** [YOUR_JOB_SEARCH_STATUS]
 
 ## Education
 

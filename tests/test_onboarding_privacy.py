@@ -1,13 +1,11 @@
 """Guards for the onboarding privacy warnings (issue #345).
 
 The README's quick start walks a new user into creating a public fork
-(forks of public repos cannot be private) and then has /setup write
-personal data into tracked files, with the only complete warning sitting
-in SETUP.md section 8 - a section about pulling updates, downstream of
-the decision it should inform. A real user hit exactly this. These tests
-pin that the warning lives at the point of decision (adjacent to both
-fork commands) and that /setup checks the origin's visibility BEFORE
-writing anything, not in its closing notes.
+(forks of public repos cannot be private). /setup used to write personal
+data into tracked files, with the only complete warning sitting in
+SETUP.md section 8. These tests pin that the warning still lives at the
+point of decision, and that /setup now writes personal data only under
+gitignored profile.local/ and says so before it writes anything.
 """
 import re
 import unittest
@@ -39,7 +37,13 @@ class TestForkWarningsAtTheDecisionPoint(unittest.TestCase):
         self.assertIn(
             "personal data",
             body,
-            f"{where}'s fork section must say /setup writes personal data into tracked files",
+            f"{where}'s fork section must say what happens to personal data",
+        )
+        self.assertIn("profile.local", body, f"{where} must name the gitignored profile directory")
+        self.assertNotIn(
+            "into **tracked** files",
+            body,
+            f"{where} must not tell the user that /setup personalizes tracked files",
         )
         self.assertRegex(
             body,
@@ -79,6 +83,13 @@ class TestSetupChecksOriginBeforeWriting(unittest.TestCase):
             text[max(0, preflight_at - 2000) : preflight_at + 2000].lower(),
             "the preflight must be about public visibility, not just remote presence",
         )
+
+    def test_step3_writes_only_the_gitignored_profile(self):
+        text = SETUP_COMMAND.read_text(encoding="utf-8")
+        step3 = text[text.index("## Step 3:") : text.index("## Step 4:")]
+        self.assertIn("profile.local/", step3)
+        self.assertIn("Never modify the tracked template", step3)
+        self.assertNotIn("into **tracked** files", text)
 
 
 if __name__ == "__main__":

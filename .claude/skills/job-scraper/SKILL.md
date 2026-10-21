@@ -38,13 +38,13 @@ Optional arguments:
 
 ### Step 0: Load Search Strategy
 
-Read `search-queries.md` (this directory) for the search strategy. `tools/scrape_state.py` reads `job_scraper/seen_jobs.json` and `job_search_tracker.csv` for deduplication; do not load either growing file into the conversation.
+Read `profile.local/search-queries.md` when that file exists; otherwise read `search-queries.md` in this directory. The tracked file is the placeholder template. Do not copy a filled query file back over it. `tools/scrape_state.py` reads `job_scraper/seen_jobs.json` and `job_search_tracker.csv` for deduplication; do not load either growing file into the conversation.
 
 > **Windows:** run these tools as `python`, not `python3`. A python.org install ships no `python3`, so that name reaches the Microsoft Store alias, which either exits 49 with no output (#669) or starts a separate Store Python without the packages `pip` installed (such as pypdf). `.claude/settings.json` allows both spellings.
 
 ### Step 1: Search
 
-Read `search-queries.md` (this directory) for the search strategy. By default, run the top 3 priority query categories. If the user said "broad", run all categories. If the user specified a focus area (e.g. "data science"), prioritize queries from that category.
+Read `profile.local/search-queries.md` when that file exists; otherwise read `search-queries.md` in this directory. By default, run the top 3 priority query categories. If the user said "broad", run all categories. If the user specified a focus area (e.g. "data science"), prioritize queries from that category.
 
 **Use the installed CLI tools as the primary search mechanism.** Fall back to `WebSearch` only for portals that do not have a CLI skill, or if `bun` is unavailable on the system.
 
@@ -74,11 +74,13 @@ Run all portal CLI calls in parallel where possible using the Agent tool. Collec
 
 If a CLI tool exits with a non-zero code, log the error message and continue — do not abort the whole search.
 
+**Browser-session portals** (`zhipin-search`, `liepin-search`, and any later adapter registered the same way) are different from the public-page CLIs. They search inside the user's own logged-in browser profile. `MISSING_SESSION` means the user has not run that portal's `login` command in a terminal yet. `CHALLENGE_REQUIRED` means the site is showing a captcha. Do not retry, do not solve the challenge, do not raise the limit, and do not fall back to WebSearch for `zhipin.com` or `liepin.com`. Record the error and continue with the other portals. `login` itself needs an interactive terminal; do not run it from this workflow.
+
 #### 1c. WebSearch fallback
 
 Use `WebSearch` for:
 - Portals listed in `search-queries.md` that do **not** have a corresponding directory under `.agents/skills/`
-- Any portal whose CLI fails at runtime
+- Any portal whose CLI fails at runtime, **except** the browser-session portals named above
 - When bun is unavailable (Step 1a failed)
 
 Use the site-specific query strings from `search-queries.md` directly as WebSearch queries for these portals.

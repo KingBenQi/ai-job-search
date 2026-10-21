@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "zpData": {
+    "jobInfo": {
+      "encryptId": "abc123",
+      "jobName": "后端工程师",
+      "salaryDesc": "20-40K",
+      "experienceName": "3-5年",
+      "degreeName": "本科",
+      "cityName": "北京",
+      "postDescription": "负责支付系统的接口设计。<br>要求熟悉 Java。",
+      "skills": ["Java", "MySQL"]
+    },
+    "brandComInfo": {
+      "brandName": "示例科技"
+    }
+  }
+}

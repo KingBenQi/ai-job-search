@@ -1,6 +1,6 @@
 # /setup - Profile Onboarding
 
-You are running the onboarding setup for the AI Job Search framework. Your goal is to collect the user's professional information and populate all profile files so the `/apply` workflow works out of the box.
+You are running the onboarding setup for the AI Job Search framework. Your goal is to collect the user's professional information and write it under `profile.local/` (gitignored) so the `/apply` workflow works. Never personalize a git-tracked file.
 
 There are three paths into setup. Step 0 picks the right one; all three converge on Step 3 (file generation) and Step 4 (confirmation).
 
@@ -20,11 +20,10 @@ visibility cannot be determined — warn now and wait:
 
 > **Heads-up before we start:** your `origin` points at `<owner/repo>`, which is a
 > public GitHub fork. This setup writes your personal data (name, contact details,
-> employment history, salary expectations) into **tracked** files, and anything you
-> commit *and push* to that fork is visible to anyone. Two safe options: keep your
-> profile commits local and never push them, or push to a **private** repository
-> instead — SETUP.md section 8 has the two-minute private-remote recipe. Want to
-> continue with the setup?
+> employment history, salary expectations) only into gitignored `profile.local/`.
+> It does not edit tracked templates. Do not force-add that directory. A private
+> repository is the right place for a backup — SETUP.md section 8 has the
+> two-minute private-remote recipe. Want to continue with the setup?
 
 Wait for the user's confirmation before showing the path prompt. A private origin, no
 origin, or a non-fork remote needs no warning — continue silently.
@@ -105,6 +104,8 @@ Read these in parallel before extracting anything. You must know what is already
 - `.claude/skills/job-application-assistant/05-cv-templates.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
 - `.claude/skills/job-application-assistant/07-interview-prep.md`
+
+If `profile.local/<filename>` already exists, that copy is the current content and the tracked file is only the schema. Never write personal data into the tracked path.
 
 Hold this content in context throughout Path A. Do not re-read.
 
@@ -235,7 +236,7 @@ Wait for the user's choice on each conflict. If no conflicts, state "No conflict
 
 ### Step A7: Write Confirmed Changes and Fill Gaps
 
-Apply the confirmed changes with the Edit tool. Make targeted edits only. Do not rewrite entire files. State which changes were applied per file. If a file has no confirmed changes, state "No changes made to [filename]."
+Copy each tracked skill file into `profile.local/` (same filename) the first time you write it. Apply the confirmed changes with the Edit tool on the profile.local copy only. Make targeted edits only. Do not rewrite entire files. Never modify the tracked template. State which changes were applied per file. If a file has no confirmed changes, state "No changes made to [filename]."
 
 Documents cover skills, experience, education, references, and behavioral signal. They do not cover everything `/apply` and `/scrape` need. After the writes, ask follow-up questions for gaps:
 
@@ -247,7 +248,7 @@ Documents cover skills, experience, education, references, and behavioral signal
 - Commute or location constraints (if not visible from CV)
 - Job search configuration (use the questions from Path C Section 9 below)
 
-Then proceed to Step 3 to populate the non-skill files (`CLAUDE.md`, `cv/main_example.tex`, `.claude/skills/job-scraper/search-queries.md`). Step 3 will detect that the seven skill files are already populated and skip those substeps.
+Then proceed to Step 3 to populate the non-skill files under `profile.local/` (`profile.local/CLAUDE.md`, `profile.local/cv/main_example.tex`, `profile.local/search-queries.md`). Step 3 will detect that the seven skill-file copies under `profile.local/` are already populated and skip those substeps. The tracked templates stay placeholders.
 
 ---
 
@@ -338,8 +339,9 @@ Ask about:
 - **Key skills as search terms:** "Which of your skills are most likely to appear in job postings?" Pick 3-5 that are distinctive and searchable.
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
-- **Job portals:** "The framework ships country-agnostic search CLIs (`linkedin-search`, `freehire-search`, enabled by default) plus Danish portal demos (Jobindex, Jobbank, Jobdanmark, Jobnet) that ship **disabled**. `/scrape` auto-discovers whatever portal skills are installed under `.agents/skills/` and skips any with `enabled: false`. Which portals fit your market?" **Then act on the answer:** if the user's market is Denmark (or they ask for the Danish boards), edit each of the four Danish `SKILL.md` files and set `enabled: true` in the frontmatter; otherwise leave them disabled and say so - they cost nothing while disabled and can be enabled later by flipping the flag. If the user needs a local board that is not shipped, guide them to `/add-portal` (market-specific skills live in their fork). WebSearch/`site:` queries remain the fallback for portals without a CLI skill.
-- **CV language:** "Should your CVs be written in English (the default, accepted in most markets), or in your market's language?" Record the answer as a `CV language: <language>` line in CLAUDE.md's Identity section. Cover letters always match each posting's language automatically; this setting governs the CV only. If the user is unsure, keep English and note they can re-run `/setup --section search` to change it.
+- **Job portals:** "The framework ships country-agnostic search CLIs (`linkedin-search`, `freehire-search`, enabled by default) plus Danish portal demos (Jobindex, Jobbank, Jobdanmark, Jobnet) that ship **disabled**. `/scrape` auto-discovers whatever portal skills are installed under `.agents/skills/` and skips any with `enabled: false`. Which portals fit your market?" **Then act on the answer:** if the user's market is Denmark (or they ask for the Danish boards), edit each of the four Danish `SKILL.md` files and set `enabled: true` in the frontmatter (a boolean flag, not personal data); otherwise leave them disabled and say so - they cost nothing while disabled and can be enabled later by flipping the flag. If the user needs a local board that is not shipped, guide them to `/add-portal` (market-specific skills live in their fork). WebSearch/`site:` queries remain the fallback for portals without a CLI skill.
+- **CV language:** "Should your CVs be written in English (the default, accepted in most markets), or in your market's language?" Record the answer as a `CV language: <language>` line in the Identity section of `profile.local/CLAUDE.md` (copy the tracked template first if the copy does not exist). Never modify the tracked `CLAUDE.md`. Cover letters always match each posting's language automatically; this setting governs the CV only. If the user is unsure, keep English and note they can re-run `/setup --section search` to change it. A Chinese job posting is the one exception, handled by `/apply`: the CV, the cover letter, and a short 打招呼语 are drafted in Chinese from the ctex templates even when this setting is English.
+- **Chinese job-search preferences:** when the user is targeting Boss直聘 or 猎聘, or their CV language is Chinese, also ask for 期望城市, 期望薪资, 到岗时间, 学历, 工作年限, and 求职状态. Record them under `## Job Search Preferences` in `profile.local/01-candidate-profile.md` and in the matching block of `profile.local/CLAUDE.md`. Never modify the tracked templates. Skip the questions when the user is not targeting that market, and leave the placeholders in the local copies.
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
 - If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"
@@ -352,39 +354,41 @@ This proactive suggestion step helps users discover career paths they might not 
 
 ## Step 3: Generate Profile Files
 
-Once data collection is complete, generate or finish populating the following files. **For Path A**, the seven skill files are already populated by Step A7; check each before writing and skip if its content is no longer placeholder text.
+**Write target.** Every file this step fills is written under `profile.local/`, which is gitignored. Seed a missing copy from the tracked template, then edit the copy. Never modify the tracked template. A filename in a heading below is the template's name; the write path is `profile.local/<that filename>`, `profile.local/cv/main_example.tex` for the CV, and `profile.local/search-queries.md` for the search queries (seeded from `.claude/skills/job-scraper/search-queries.md`).
+
+Once data collection is complete, generate or finish populating those copies. **For Path A**, the copies under `profile.local/` are already populated by Step A7; check each copy before writing and skip a section whose local copy is no longer placeholder text. Do not skip by looking at the tracked template: that file stays placeholders on purpose.
 
 ### 1. Update `CLAUDE.md`
-Replace all `[PLACEHOLDER]` tokens with the user's actual information. Keep the structure, workflow, and verification checklist intact.
+Copy the tracked `CLAUDE.md` to `profile.local/CLAUDE.md` if the copy does not exist. Replace all `[PLACEHOLDER]` tokens in the profile.local copy only. Keep the structure, workflow, and verification checklist intact. Never modify the tracked template.
 
 ### 2. Populate `01-candidate-profile.md` *(Path B and C; skip if Path A populated it)*
-Write the full candidate profile with structured sections: Identity (including Languages, with levels), Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References.
+Copy `.claude/skills/job-application-assistant/01-candidate-profile.md` to `profile.local/01-candidate-profile.md` if needed. Write the full candidate profile into the profile.local copy only, with structured sections: Identity (including Languages, with levels), Job Search Preferences (the Chinese-market fields, placeholders kept when they were not asked), Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References. Never modify the tracked template.
 
 ### 3. Populate `02-behavioral-profile.md` *(Path B and C; skip if Path A populated it)*
-Write the behavioral profile based on assessment results or synthesized answers.
+Copy the tracked file to `profile.local/02-behavioral-profile.md` if needed. Write the behavioral profile into the profile.local copy only, based on assessment results or synthesized answers. Never modify the tracked template.
 
 ### 4. Update `04-job-evaluation.md` *(Path B and C; skip if Path A populated it)*
-Replace skill match areas with the user's actual skills:
+Copy the tracked file to `profile.local/04-job-evaluation.md` if needed. In the profile.local copy only, replace skill match areas with the user's actual skills:
 - Strong match areas: [their primary skills]
 - Moderate match areas: [their secondary skills]
 - Weak match areas: [skills they lack]
 
-Update career goals and motivation filters with their actual preferences.
+Update career goals and motivation filters with their actual preferences. Never modify the tracked template.
 
 ### 5. Update `05-cv-templates.md` *(Path B and C; skip if Path A populated it)*
-Add role-specific profile statement templates based on their background, and personalise the contact block inside the file's LaTeX template: replace `[FIRST_NAME]`, `[LAST_NAME]`, `[YOUR_ADDRESS]`, `[YOUR_PHONE]`, `[YOUR_EMAIL]`, `[YOUR_LINKEDIN_URL]` and `[YOUR_GITHUB_URL]` (and `[YOUR_NAME]` in the PDF title) with their actual details. Check this block whichever path ran - Path A extracts profile statements from documents, not the contact block. `/apply` builds every tailored CV from this template, so a placeholder left here reaches a compiled document.
+Copy the tracked file to `profile.local/05-cv-templates.md` if needed. In the profile.local copy only, add role-specific profile statement templates based on their background, and personalise the contact block inside the file's LaTeX template: replace `[FIRST_NAME]`, `[LAST_NAME]`, `[YOUR_ADDRESS]`, `[YOUR_PHONE]`, `[YOUR_EMAIL]`, `[YOUR_LINKEDIN_URL]` and `[YOUR_GITHUB_URL]` (and `[YOUR_NAME]` in the PDF title) with their actual details. Check this block whichever path ran - Path A extracts profile statements from documents, not the contact block. `/apply` builds every tailored CV from this local copy, so a placeholder left here reaches a compiled document. Never modify the tracked template.
 
 ### 6. Update `06-cover-letter-templates.md` *(all paths - Path A does not fill this block)*
-Personalise the contact line and the signature inside the file's LaTeX template: replace `[YOUR_NAME]`, `[YOUR_EMAIL]`, `[YOUR_PHONE]` and `[YOUR_LINKEDIN_URL]` in the `\namesection{}` line, and `[YOUR_NAME]` in `\signature{}`. Path A merges only structural patterns (openings, bullets, closings) into this file, never the contact block. `/apply` compiles every cover letter from this template.
+Copy the tracked file to `profile.local/06-cover-letter-templates.md` if needed. In the profile.local copy only, personalise the contact line and the signature inside the file's LaTeX template: replace `[YOUR_NAME]`, `[YOUR_EMAIL]`, `[YOUR_PHONE]` and `[YOUR_LINKEDIN_URL]` in the `\namesection{}` line, and `[YOUR_NAME]` in `\signature{}`. Path A merges only structural patterns (openings, bullets, closings) into this copy, never the contact block. `/apply` compiles every cover letter from this local copy. Never modify the tracked template.
 
 ### 7. Update `07-interview-prep.md` *(Path B and C; skip if Path A populated it)*
-Create STAR examples from their actual experience (at least 3-4 examples). Path A leaves STAR stubs under "## STAR Candidates (Complete Manually)" rather than full examples; if any stubs are present, mention them in Step 4 so the user knows to flesh them out.
+Copy the tracked file to `profile.local/07-interview-prep.md` if needed. In the profile.local copy only, create STAR examples from their actual experience (at least 3-4 examples). Path A leaves STAR stubs under "## STAR Candidates (Complete Manually)" rather than full examples; if any stubs are present, mention them in Step 4 so the user knows to flesh them out. Never modify the tracked template.
 
 ### 8. Update `cv/main_example.tex`
-Replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries.
+Copy `cv/main_example.tex` to `profile.local/cv/main_example.tex` if needed. Replace placeholder personal data in the profile.local copy only with their actual name, contact info, and add their education and most recent experience entries. Never modify the tracked template.
 
 ### 9. Generate `.claude/skills/job-scraper/search-queries.md`
-Replace all placeholder tokens in the search queries file with the user's actual information from Section 9 (or the equivalent follow-up questions in Path A's Step A7):
+Copy the tracked file to `profile.local/search-queries.md` if needed. Replace all placeholder tokens in the profile.local copy only with the user's actual information from Section 9 (or the equivalent follow-up questions in Path A's Step A7). Never modify the tracked template.
 - Replace `[YOUR_PRIMARY_ROLE_TYPE]`, `[YOUR_PRIMARY_JOB_TITLE]`, etc. with actual role titles
 - Replace `[YOUR_KEY_SKILL]`, `[YOUR_DOMAIN_KEYWORD_1]`, etc. with actual skills and domain terms
 - Replace `[YOUR_CITY]`, `[YOUR_COUNTRY]`, `[YOUR_REGION]` with actual location
@@ -401,22 +405,22 @@ Replace all placeholder tokens in the search queries file with the user's actual
 
 Present a summary:
 
-> **Setup complete!** Here's what was generated:
+> **Setup complete!** Here's what was generated, all under gitignored `profile.local/`:
 >
-> - `CLAUDE.md` - Your full candidate profile
-> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Structured profile
-> - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Behavioral assessment
-> - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
-> - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements and contact block
-> - `.claude/skills/job-application-assistant/06-cover-letter-templates.md` - Cover letter templates with your contact line and signature
-> - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
-> - `cv/main_example.tex` - Your LaTeX CV template
-> - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/scrape`
+> - `profile.local/CLAUDE.md` - Your full candidate profile
+> - `profile.local/01-candidate-profile.md` - Structured profile
+> - `profile.local/02-behavioral-profile.md` - Behavioral assessment
+> - `profile.local/04-job-evaluation.md` - Personalized evaluation framework
+> - `profile.local/05-cv-templates.md` - CV templates with your profile statements and contact block
+> - `profile.local/06-cover-letter-templates.md` - Cover letter templates with your contact line and signature
+> - `profile.local/07-interview-prep.md` - STAR examples from your experience
+> - `profile.local/cv/main_example.tex` - Your LaTeX CV template
+> - `profile.local/search-queries.md` - Job search queries for `/scrape`
 >
-> **Privacy note:** the files above now contain your personal data and are *tracked by git*.
-> A GitHub fork of the template is always public (forks of public repos cannot be made
-> private), so do not push these commits to a fork. Keep them local, or push to a private
-> repository instead - see SETUP.md section 8 for the private-remote setup.
+> **Privacy note:** those files are gitignored. The tracked templates were not modified.
+> Do not `git add -f` `profile.local/`. A public fork stays free of this personal data
+> unless you force-add it. A private repository is still the right backup if you want
+> the profile off this machine — see SETUP.md section 8 for the private-remote setup.
 >
 > **Try it out:**
 > - Run `/scrape` to search for matching jobs right now
@@ -431,7 +435,7 @@ If Path A left any STAR stubs in `07-interview-prep.md`, also note:
 
 ## Design Principles
 
-- Three onboarding paths converge on the same skill files. Step 0 picks the right path based on what's in `documents/`. Steps 3 and 4 are shared.
+- Three onboarding paths converge on the same files under gitignored `profile.local/`. Step 0 picks the right path based on what's in `documents/`. Steps 3 and 4 are shared. Tracked templates stay placeholders.
 - Path A is read-before-write and idempotent. Re-running it as documents are added does not duplicate or overwrite existing content; conflicts are surfaced for explicit resolution.
 - Path A labels inferred behavioral or style additions so the user can review them critically before relying on them.
 - Each section in Path C is a natural conversation, not a form. The user can skip optional sections.

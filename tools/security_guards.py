@@ -65,6 +65,8 @@ ALLOWED_PERMISSIONS = {
     "Bash(bun run .agents/skills/jobnet-search/cli/src/cli.ts:*)",
     "Bash(bun run .agents/skills/linkedin-search/cli/src/cli.ts:*)",
     "Bash(bun run .agents/skills/freehire-search/cli/src/cli.ts:*)",
+    "Bash(bun run .agents/skills/zhipin-search/cli/src/cli.ts:*)",
+    "Bash(bun run .agents/skills/liepin-search/cli/src/cli.ts:*)",
     "Bash(python salary_lookup.py:*)",
     "Bash(python3 salary_lookup.py:*)",
     "Bash(python tools/rank_state.py:*)",
@@ -146,6 +148,12 @@ REQUIRED_DENY_RULES = [
 # Personal-data ignore rules that must never disappear from .gitignore.
 REQUIRED_IGNORE_RULES = [
     "salary_data.json",
+    ".browser-profiles/",
+    "**/.browser-profiles/",
+    ".browser-deps/",
+    "profile.local.md",
+    "profile.local/",
+    "cover_letters/greeting_*.*",
     # Depth-independent: the job-scraper skill resolves `job_scraper/` relative
     # to its own directory, so the state file lands under .claude/skills/... and
     # a repo-rooted rule silently fails to match it.
@@ -156,9 +164,11 @@ REQUIRED_IGNORE_RULES = [
     "linkedin_Profile.pdf",
     "cv/main_*.*",
     "!cv/main_example.tex",
+    "!cv/main_zh_example.tex",
     # ATS text extractions (/apply step 5d) carry the CV's full text.
     "cv/*.txt",
     "cover_letters/cover_*.*",
+    "!cover_letters/cover_zh_example.tex",
     # /apply also recognizes the uppercase Cover_* naming variant.
     "cover_letters/Cover_*.*",
     "documents/cv/**",
@@ -205,7 +215,10 @@ REQUIRED_IGNORE_RULES = [
 ALLOWED_IGNORE_NEGATIONS = {
     "!cover_letters/OpenFonts/fonts/**",
     "!cv/main_example.tex",
+    "!cv/main_zh_example.tex",
     "!cover_letters/cover_example.tex",
+    "!cover_letters/cover_zh_example.tex",
+    "!cover_letters/greeting_zh_example.md",
     "!documents/**/.gitkeep",
 }
 

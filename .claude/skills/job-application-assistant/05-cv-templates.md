@@ -1,5 +1,5 @@
 ---
-framework_version: 1.4.8
+framework_version: 1.4.9
 ---
 
 # CV Templates and Tailoring Guide
@@ -379,3 +379,19 @@ The section order varies by role type:
 4. Professional Experience (reverse chronological)
 5. Publications & Awards
 6. References
+
+## Chinese CV (ctex)
+
+Use this template when the CV language is Chinese, and when `/apply` is drafting for a Chinese job posting (Boss直聘, 猎聘, or any other Chinese JD). That posting-language switch is the one exception to the profile-level CV language rule, and it is specified in `/apply`.
+
+**Structural reference:** `cv/main_zh_example.tex`
+**Output file:** still `cv/main_<company>_<role>.tex`
+**Compile with:** `xelatex` (ctex's `fontset=fandol` path). Do not compile this template with the moderncv `lualatex` command.
+
+```bash
+cd cv && xelatex -interaction=nonstopmode main_<company>_<role>.tex
+```
+
+The document class is `ctexart`, not moderncv. Section headings are Chinese (`个人优势`, `工作经历`, `项目经历`, `教育经历`, `技能`). The header line carries 期望城市, 期望薪资, 到岗时间, and 学历 from the profile's Job Search Preferences. Facts still come only from the profile, `CLAUDE.md`, and the master CV. A two-page limit still applies. Date ranges use a single ASCII hyphen.
+
+`fontset=fandol` uses the Fandol fonts shipped with TeX Live's Chinese support (`texlive-lang-chinese` on Debian/Ubuntu). No system CJK font is required. A minimal TeX install needs `ctex` and those fonts before this file will compile.

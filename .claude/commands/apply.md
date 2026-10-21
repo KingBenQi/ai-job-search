@@ -10,6 +10,8 @@ This is not bookkeeping. A fact that exists only in chat **will be treated as un
 
 This rule is the input side of the Step 3 Factual Grounding Audit, not a competitor to it. The audit is deliberately strict: an ungrounded claim is removed, and it cannot tell a fabrication from a real fact the user stated out loud last week. That strictness is correct, and it is exactly why confirmed facts have to reach the sources in the same turn they surface. Write to `01-candidate-profile.md` specifically — it is one of the audit's three sources, so a fact recorded there is grounded on the next run. Adding a fact to `01` that `CLAUDE.md` and the master CV simply do not mention is an absence, not a contradiction, and does not trip the audit's profile-consistency warning; if the new fact *corrects* something either of those states, fix it there too rather than leaving the two sources disagreeing.
 
+**Profile path.** Personal facts are read from and written to `profile.local/` (gitignored). Wherever this command names `01-candidate-profile.md`, `CLAUDE.md`, or `cv/main_example.tex` as a fact source or a write target, use the `profile.local/` copy (`profile.local/01-candidate-profile.md`, `profile.local/CLAUDE.md`, `profile.local/cv/main_example.tex`). If the copy does not exist, copy the tracked template into `profile.local/` first and edit the copy. Never modify the tracked template. The same split applies to `02`, `04`, `05`, `06`, `07`, and `search-queries.md`.
+
 **Token-efficiency rules for this workflow:**
 - Never re-Read a file whose contents are already in your context from an earlier step. If you read it in Step 1, it is still available in Step 2.
 - When dispatching the reviewer agent, pass draft content **inline in the agent prompt** rather than asking the agent to Read files you already have in memory.
@@ -109,17 +111,18 @@ Also read the most recent existing CV and cover letter files for concrete struct
 *In both filenames below, `<company>_<role>` is derived by the **Subfolder naming** rule in `documents/README.md` — the same rule `/outcome` Step 1.4 uses for the archive folder, so a `/` or other path character in a company or role name can never split the filename across directories.*
 
 ### CV (`cv/main_<company>_<role><CV_EXT>`)
-- In the **CV language from the profile** (the `CV language:` line in CLAUDE.md's Identity section). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable
-- Follow the moderncv/banking format from `05-cv-templates.md`
+- In the **CV language from the profile** (the `CV language:` line in CLAUDE.md's Identity section). When the profile does not set one, default to **English**. Never switch language per posting - the CV language is a profile-level choice, so all CVs stay consistent and reusable. **Exception:** a Chinese posting (the fetcher reports Chinese, or the cleaned text is predominantly Han characters) is drafted in Chinese even when the profile CV language is English. Chinese recruiters on Boss直聘 and 猎聘 expect a Chinese resume. Use `cv/main_zh_example.tex` (ctex) as the structural reference in that case, and also when the profile CV language itself is Chinese.
+- Follow the moderncv/banking format from `05-cv-templates.md` for every CV that is not Chinese. A Chinese CV follows the ctex section in `05-cv-templates.md` instead.
 - Tailor the profile statement and experience bullets to the specific role
 - Reframe skills and achievements to match job requirements
 - Keep to 2 pages
 - **Grounding Audit:** Before writing to disk, audit all tailored bullet points against the union of three sources: `.claude/skills/job-application-assistant/01-candidate-profile.md` + the master CV (`cv/main_example.tex`) + `CLAUDE.md`'s Candidate Profile section to verify that all dates, roles, and metrics match exactly (zero profile drift or fabrication).
 
 ### Cover Letter (`cover_letters/cover_<company>_<role><COVER_EXT>`)
-- **Match the language of the job posting** (Danish posting -> Danish cover letter, English posting -> English cover letter)
+- **Match the language of the job posting** (Danish posting -> Danish cover letter, English posting -> English cover letter, Chinese posting -> Chinese cover letter)
 - Follow the structure from `06-cover-letter-templates.md`
-- Use the `cover.cls` template
+- Use the `cover.cls` template, except for a Chinese letter, which uses `cover_letters/cover_zh_example.tex` (ctex, xelatex) because `cover.cls` loads Raleway and has no CJK glyphs
+- For a Chinese posting, also write `cover_letters/greeting_<company>_<role>.md`, a 打招呼语 of about 120 Chinese characters grounded in the profile. Do not send it and do not ask the portal CLI to send it.
 - Tailor the opening paragraph to the specific role and company
 - Address to a named person if available in the posting, otherwise "Dear Hiring Manager" (or equivalent in posting language)
 - Keep to approximately one page
@@ -249,7 +252,8 @@ cd ../cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.t
 
 - **Stock CV** uses **lualatex** — pdflatex fails on modern MiKTeX with fontawesome5 font-expansion errors. lualatex handles the same sources cleanly.
 - **Stock cover letter** uses **xelatex** — cover.cls requires fontspec.
-- **Custom template active:** run its declared `<CV_COMPILE>`/`<COVER_COMPILE>` command instead, substituting the actual filename for `<file>`. Never fall back to lualatex/xelatex when a custom template's compile command is a different toolchain (e.g. `typst compile`) — that command is what the manifest actually verified in `/add-template` Step 4.
+- **Chinese CV and Chinese cover letter** both use **xelatex** on the ctex sources (`fontset=fandol`). Do not run the moderncv lualatex command on `main_zh_example.tex` or a CV drafted from it. The Raleway itemize wrapper does not apply to the Chinese letter.
+- **Custom template active:** run its declared `<CV_COMPILE>`/`<COVER_COMPILE>` command instead, substituting the actual filename for `<file>`. Never fall back to lualatex/xelatex when a custom template's compile command is a different toolchain (e.g. `typst compile`) — that command is what the manifest actually verified in `/add-template` Step 4. A Chinese posting still uses the ctex templates above when no custom template is active.
 
 If either compile fails, fix the error and re-compile until clean.
 
@@ -376,8 +380,9 @@ Summarize 3-5 key decisions made to tailor the application:
 List the files written:
 - `cv/main_<company>_<role><CV_EXT>`
 - `cover_letters/cover_<company>_<role><COVER_EXT>`
+- `cover_letters/greeting_<company>_<role>.md` when the posting is Chinese (the 打招呼语; it is not sent)
 
-Tell the user: "Both files are ready for your review. Open them to check the final output before compiling."
+Tell the user: "Both files are ready for your review. Open them to check the final output before compiling." For a Chinese posting, name the greeting file as well and say it is a draft to paste, not a message that was sent.
 
 ### Step 6b: Record the Application
 

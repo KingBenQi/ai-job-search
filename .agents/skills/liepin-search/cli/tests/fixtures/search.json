@@ -1,0 +1,40 @@
+{
+  "flag": 1,
+  "data": {
+    "data": {
+      "jobCardList": [
+        {
+          "job": {
+            "jobId": "1970001",
+            "title": "数据工程师",
+            "dq": "上海-浦东新区",
+            "salary": "25-40k·15薪",
+            "requireWorkYears": "3-5年",
+            "requireEduLevel": "本科",
+            "link": "https://www.liepin.com/job/1970001.shtml",
+            "refreshTime": "20990115120000"
+          },
+          "comp": { "compName": "示例数据" }
+        },
+        {
+          "job": {
+            "jobId": "1970002",
+            "title": "分析师",
+            "dq": "上海-徐汇区",
+            "salary": "10-15k",
+            "requireWorkYears": "1-3年",
+            "requireEduLevel": "本科",
+            "link": "https://www.liepin.com/job/1970002.shtml",
+            "refreshTime": "20200101120000"
+          },
+          "comp": { "compName": "旧岗位示例" }
+        },
+        {
+          "job": {
+            "title": "缺少编号"
+          }
+        }
+      ]
+    }
+  }
+}

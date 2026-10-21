@@ -182,12 +182,11 @@ Or manually: fork on GitHub, then clone your fork.
 > under your GitHub identity, on a repo where you cannot delete it (#389).
 
 > **Before you go further: forks are public.** GitHub cannot make a fork of a public
-> repository private, and `/setup` (section 6) writes your personal data into **tracked**
-> files — pushing those commits to a fork publishes them. If this copy is for your own
-> job search rather than for contributing, prefer a **private repository** with this repo
-> as `upstream`: see section 8, step 1 for the exact commands and why committing your
-> personalization there is still the right move. Everything else in this guide works
-> identically either way.
+> repository private. `/setup` (section 6) writes your personal data only into
+> gitignored `profile.local/` and does not personalize tracked templates. Do not
+> force-add that directory. If you want a remote backup, prefer a **private repository**
+> with this repo as `upstream`: see section 8, step 1. Everything else in this guide
+> works identically either way.
 
 ## 3. Install job search CLI dependencies
 Run these from the repository root.
@@ -222,20 +221,21 @@ Claude will offer three paths:
 - **Path B (single CV import):** Share one CV/resume by mentioning the file with `@` or pasting the text. Claude extracts it and asks follow-up questions for anything missing.
 - **Path C (interview mode):** Answer structured interview questions section by section.
 
-All three paths produce the same result: fully populated profile files.
+All three paths produce the same result: a filled profile under gitignored `profile.local/`. Tracked templates stay placeholders.
 
 ### What gets populated
 
 | File | Content |
 |------|---------|
-| `CLAUDE.md` | Your full candidate profile |
-| `01-candidate-profile.md` | Structured education, experience, skills |
-| `02-behavioral-profile.md` | Behavioral assessment |
-| `04-job-evaluation.md` | Personalized skill match areas and career goals |
-| `05-cv-templates.md` | Profile statement templates for your background |
-| `07-interview-prep.md` | STAR examples from your experience |
-| `cv/main_example.tex` | Your LaTeX CV with actual details |
-| `search-queries.md` | Job search queries for `/scrape` |
+| `profile.local/CLAUDE.md` | Your full candidate profile |
+| `profile.local/01-candidate-profile.md` | Structured education, experience, skills |
+| `profile.local/02-behavioral-profile.md` | Behavioral assessment |
+| `profile.local/04-job-evaluation.md` | Personalized skill match areas and career goals |
+| `profile.local/05-cv-templates.md` | Profile statement templates for your background |
+| `profile.local/06-cover-letter-templates.md` | Cover letter contact line and signature |
+| `profile.local/07-interview-prep.md` | STAR examples from your experience |
+| `profile.local/cv/main_example.tex` | Your LaTeX CV with actual details |
+| `profile.local/search-queries.md` | Job search queries for `/scrape` |
 
 ### Re-running setup
 

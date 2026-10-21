@@ -1,5 +1,5 @@
 ---
-framework_version: 1.1.7
+framework_version: 1.1.8
 ---
 
 # Web Research and Fetching
@@ -79,6 +79,8 @@ Try these in order and stop at the first that yields real content:
 ### Login walls are a different failure
 
 A page that returns 200 but renders a sign-in prompt (common on LinkedIn job views) is **not** fixable with headers. Go to step 4 and find the employer's own posting. Never draft from an aggregator's title plus assumption.
+
+Boss直聘 (`zhipin.com`) and 猎聘 (`liepin.com`, `c.liepin.com`) are the exception that stays on step 1. Their portal CLIs open the user's own logged-in browser profile. A `MISSING_SESSION` or `CHALLENGE_REQUIRED` result is a stop: ask the user to run `login` or to solve the challenge in the browser. Do not bypass it, and do not fetch those hosts with `fetch_page.py` as a substitute.
 
 ## Prefer the employer's own posting
 

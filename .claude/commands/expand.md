@@ -2,6 +2,8 @@
 
 You are enriching the candidate profile by discovering competencies hidden in documents and public online presence. This command is additive only — it never modifies existing profile content, only extends it.
 
+**Personal data path.** Read and write `profile.local/01-candidate-profile.md` and `profile.local/02-behavioral-profile.md`. If a copy does not exist, copy the tracked template into `profile.local/` first. Never modify the tracked template. The filenames in later steps mean those copies.
+
 Follow these steps **exactly in order**. Do not skip steps.
 
 ---
