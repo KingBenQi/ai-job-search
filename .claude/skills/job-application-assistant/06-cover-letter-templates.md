@@ -1,5 +1,5 @@
 ---
-framework_version: 1.0.2
+framework_version: 1.0.3
 ---
 
 # Cover Letter Templates and Tailoring Guide
@@ -172,6 +172,16 @@ Escape these wherever they appear in body text:
 - [ ] Language matches the job posting language
 - [ ] Salutation is appropriate (named person if possible)
 - [ ] Headline is engaging and specific, not generic
+
+## Chinese cover letter and 打招呼语 (ctex)
+
+When the posting is Chinese, do not use `cover.cls`. Raleway has no CJK glyphs, and the itemize font wrapper in the stock template does not apply. Use `cover_letters/cover_zh_example.tex` as the structural reference (`ctexart`, `fontset=fandol`, `xelatex`). The letter is still one page, still addressed to a named person or `尊敬的招聘负责人`, and the signature still has to fit on that page.
+
+Also write `cover_letters/greeting_<company>_<role>.md`: a 打招呼语 short enough to paste into Boss直聘 (about 120 Chinese characters). The structural reference is `cover_letters/greeting_zh_example.md`. State the company, the role, and one grounded highlight. Do not send it. The portal CLIs refuse `--send` and `--batch`; the user pastes the draft.
+
+```bash
+cd cover_letters && xelatex -interaction=nonstopmode cover_<company>_<role>.tex
+```
 
 ## Submission Guidelines (Best Practice)
 - Submit only the documents the employer requests

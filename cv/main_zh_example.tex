@@ -1,0 +1,49 @@
+%% Chinese CV structural reference.
+%% Used when the CV language is Chinese, and when /apply drafts for a Chinese JD.
+%% Compile with: xelatex -interaction=nonstopmode main_zh_example.tex
+%% Requires ctex and the Fandol fonts (Debian/Ubuntu: texlive-lang-chinese texlive-xetex).
+
+\documentclass[11pt,a4paper,fontset=fandol]{ctexart}
+\usepackage[margin=1.7cm]{geometry}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\begin{document}
+
+{\LARGE\bfseries [YOUR\_NAME]}\\[2pt]
+[YOUR\_PHONE] \quad [YOUR\_EMAIL]\\[2pt]
+期望城市：[YOUR\_EXPECTED\_CITIES] \quad
+期望薪资：[YOUR\_EXPECTED\_SALARY] \quad
+到岗时间：[YOUR\_AVAILABILITY] \quad
+学历：[YOUR\_HIGHEST\_DEGREE]
+
+\section*{个人优势}
+[用 3 到 5 行说明你和目标岗位最相关的经历。只写档案里有的事实。]
+
+\section*{工作经历}
+\textbf{[JOB\_TITLE]} \hfill [START]-[END]\\
+[COMPANY] \quad [LOCATION]
+\begin{itemize}
+  \item 用一条具体职责或结果说明你做了什么。
+  \item 第二条，对应岗位要求中的一项。
+\end{itemize}
+
+\textbf{[EARLIER\_JOB\_TITLE]} \hfill [START]-[END]\\
+[EARLIER\_COMPANY] \quad [LOCATION]
+\begin{itemize}
+  \item 较早一段经历里和岗位相关的事实。
+\end{itemize}
+
+\section*{项目经历}
+\textbf{[PROJECT\_NAME]} \hfill [YEAR]\\
+[一句话说明项目，以及你在其中的角色。]
+
+\section*{教育经历}
+\textbf{[DEGREE]} \hfill [YEAR\_START]-[YEAR\_END]\\
+[INSTITUTION] \quad [FIELD]
+
+\section*{技能}
+[YOUR\_PRIMARY\_SKILLS]
+
+\end{document}

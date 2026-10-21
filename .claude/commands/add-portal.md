@@ -154,6 +154,7 @@ Present a summary:
 ## Design Principles
 
 - The generator is country-agnostic; its output is market-specific and stays in the user's fork. This matches the repo policy that upstream stays a universal template.
+- Login-walled boards are still declined by this command. Boss直聘 and 猎聘 in this fork are the exception that uses the browser-session adapter in `.agents/skills/_cn-browser/` (the user's own login, no captcha bypass). A further login-walled board implements `PortalAdapter` there. A public board still goes through this command.
 - Investigation before scaffolding: the command never generates parsers from guesses - Step 2 fetches real responses first, and Step 4 verifies against live data before anything is registered.
 - The portal-skill contract keeps every generated skill interchangeable with the shipped ones: same commands, same flags, same output shape, same error convention.
 - Zero runtime dependencies by default, matching `linkedin-search` - a portal skill should run on a fresh clone with nothing but `bun`.

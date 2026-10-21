@@ -4,7 +4,7 @@
 
 ## Installed portal CLIs (primary for `/scrape`)
 
-`/scrape` discovers every portal skill under `.agents/skills/*/SKILL.md` and runs its CLI first. Shipped country-agnostic CLIs include `linkedin-search` and `freehire-search`; Danish demos and any skill you add with `/add-portal` are included the same way. You do **not** need a matching `site:` line below for those CLIs to run.
+`/scrape` discovers every portal skill under `.agents/skills/*/SKILL.md` and runs its CLI first. Shipped country-agnostic CLIs include `linkedin-search` and `freehire-search`; Danish demos and any skill you add with `/add-portal` are included the same way. This fork also ships `zhipin-search` (Boss直聘) and `liepin-search` (猎聘). Those two use a logged-in browser profile rather than a public API. You do **not** need a matching `site:` line below for those CLIs to run, and you should not add `site:zhipin.com` or `site:liepin.com` fallbacks: a search-index snippet is not a posting, and those hosts are login-walled.
 
 The `site:` query templates in this file are the **WebSearch fallback** — for portals without a CLI, company career pages, or when a CLI fails.
 

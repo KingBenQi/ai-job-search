@@ -21,6 +21,17 @@ build/
 
 # Personal data (never commit these)
 salary_data.json
+# Boss直聘 / 猎聘 browser profiles (cookies, local storage, QR login).
+# Also matches a profile directory checked out under a skill folder.
+.browser-profiles/
+**/.browser-profiles/
+# Playwright, installed on demand by tools/install_cn_browser.py. Not a
+# committed dependency: the portal package.json files stay dependency-free.
+.browser-deps/
+# Optional notes that should not land in the tracked profile templates.
+profile.local.md
+# /setup writes the filled profile here and leaves tracked templates as placeholders.
+profile.local/
 # Match at any depth: the job-scraper skill resolves `job_scraper/` relative to
 # its own directory, so these land at .claude/skills/job-scraper/job_scraper/*.
 # A rooted `job_scraper/...` pattern silently fails to match them.
@@ -65,10 +76,15 @@ skills-lock.json
 # artifacts like main_example.pdf/.aux.
 cv/main_*.*
 !cv/main_example.tex
+!cv/main_zh_example.tex
 cv/*.txt
 cover_letters/cover_*.*
 cover_letters/Cover_*.*
 !cover_letters/cover_example.tex
+!cover_letters/cover_zh_example.tex
+# 打招呼 drafts. The tracked example is the structural reference.
+cover_letters/greeting_*.*
+!cover_letters/greeting_zh_example.md
 
 # documents/ subfolder contents are personal — only README and folder structure are tracked
 documents/cv/**

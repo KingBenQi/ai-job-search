@@ -1,0 +1,48 @@
+{
+  "code": 0,
+  "message": "Success",
+  "zpData": {
+    "jobList": [
+      {
+        "encryptJobId": "abc123",
+        "jobName": "后端&amp;数据工程师",
+        "salaryDesc": "20-40K·15薪",
+        "jobExperience": "3-5年",
+        "jobDegree": "本科",
+        "skills": ["Java", "Spring"],
+        "cityName": "北京",
+        "areaDistrict": "朝阳区",
+        "businessDistrict": "望京",
+        "brandName": "示例科技",
+        "showDate": "2099-01-15"
+      },
+      {
+        "encryptJobId": "lowpay",
+        "jobName": "初级开发",
+        "salaryDesc": "8-12K",
+        "jobExperience": "1-3年",
+        "jobDegree": "大专",
+        "skills": ["PHP"],
+        "cityName": "北京",
+        "areaDistrict": "海淀区",
+        "businessDistrict": "中关村",
+        "brandName": "另一家示例"
+      },
+      {
+        "encryptJobId": "shenzhen",
+        "jobName": "深圳后端",
+        "salaryDesc": "25-35K",
+        "jobExperience": "3-5年",
+        "jobDegree": "本科",
+        "skills": ["Go"],
+        "cityName": "深圳",
+        "areaDistrict": "南山区",
+        "businessDistrict": "科技园",
+        "brandName": "深圳示例"
+      },
+      {
+        "brandName": "缺少标题的卡片"
+      }
+    ]
+  }
+}

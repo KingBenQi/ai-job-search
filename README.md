@@ -80,12 +80,13 @@ cd ai-job-search
 
 > [!IMPORTANT]
 > **A fork of this repo is always public** — GitHub does not allow private forks of
-> public repositories — and `/setup` (step 3 below) writes your personal data (name,
-> contact details, employment history, salary expectations) into **tracked** files.
-> If this copy is for your own job search rather than for contributing changes back,
-> use a **private repository** with this repo as `upstream` instead — the two-minute
-> recipe is in [SETUP.md section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork),
-> and every update workflow works identically. Fork only to contribute.
+> public repositories. `/setup` writes your personal data (name, contact details,
+> employment history, salary expectations) only into gitignored `profile.local/`
+> and does not personalize tracked templates. Do not force-add that directory.
+> If you want a remote backup of the profile, use a **private repository** with
+> this repo as `upstream` — the two-minute recipe is in
+> [SETUP.md section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork).
+> Fork only to contribute.
 
 ### 2. Install job search tools
 
@@ -105,7 +106,7 @@ claude
 /setup
 ```
 
-`/setup` offers three paths: read your `documents/` folder if you have one populated (CV PDF, LinkedIn export, diplomas, reference letters, past applications), import a single CV pasted in chat, or walk through an interview. It auto-detects what you have and asks. Documents-folder mode is idempotent and safe to re-run as you add more material; see `documents/README.md` for the layout.
+`/setup` offers three paths: read your `documents/` folder if you have one populated (CV PDF, LinkedIn export, diplomas, reference letters, past applications), import a single CV pasted in chat, or walk through an interview. It auto-detects what you have and asks. Documents-folder mode is idempotent and safe to re-run as you add more material; see `documents/README.md` for the layout. The filled profile is written only to gitignored `profile.local/`. Tracked templates stay placeholders.
 
 ### 4. Search for jobs
 
@@ -186,7 +187,9 @@ ai-job-search/
 │   ├── jobindex-search/               # Jobindex.dk (Denmark)
 │   ├── jobnet-search/                 # Jobnet.dk (Denmark, government portal)
 │   ├── linkedin-search/               # LinkedIn public job listings (country-agnostic)
-│   └── freehire-search/               # freehire.me tech job aggregator (multi-market, REST API)
+│   ├── freehire-search/               # freehire.me tech job aggregator (multi-market, REST API)
+│   ├── zhipin-search/                 # Boss直聘 (this fork; logged-in browser)
+│   └── liepin-search/                 # 猎聘 (this fork; logged-in browser)
 ├── cv/
 │   └── main_example.tex               # moderncv LaTeX template
 ├── cover_letters/
@@ -303,6 +306,75 @@ The four Danish CLI tools in `.agents/skills/` (Jobbank, Jobdanmark, Jobindex, J
 Give it your local job board's URL. The command investigates the portal (search-URL pattern, result-page structure, robots.txt/access rules), scaffolds a CLI skill with the same structure, commands, and output contract as the shipped ones, and test-runs a live query before registering anything. Auth-walled portals are declined, and portals with restrictive terms get a prominent personal-use-only warning in the generated skill. The generated skill is market-specific and lives in your fork; the generator itself is the universal part.
 
 Maintaining a fork adapted to your market or language? Add it to the [Community forks & adaptations](https://github.com/MadsLorentzen/ai-job-search/discussions/78) thread so others can find it.
+
+### Chinese job boards (Boss直聘 and 猎聘)
+
+This fork adds two login-walled boards. Neither publishes a job API. Search and job-detail reads go through Playwright, using a persistent browser profile where you log in yourself (QR code or password, typed by you). The parsers are tested on saved fixtures, so CI never calls the live sites.
+
+One-time setup:
+
+```bash
+python3 tools/install_cn_browser.py
+bun run .agents/skills/zhipin-search/cli/src/cli.ts login
+bun run .agents/skills/liepin-search/cli/src/cli.ts login
+```
+
+`login` opens a visible browser and waits until you press Enter. The session is stored in `.browser-profiles/`, which is gitignored. Playwright itself is installed into `.browser-deps/`, also gitignored. The portal `package.json` files stay free of runtime dependencies, so `bun install` in CI does not download a browser.
+
+Search:
+
+```bash
+bun run .agents/skills/zhipin-search/cli/src/cli.ts search -q "后端" -l "北京" --salary 20-40 --experience 3-5年 --limit 10
+bun run .agents/skills/liepin-search/cli/src/cli.ts search -q "数据" -l "上海" --salary 20-40 --experience 3-5年
+```
+
+`/scrape` discovers both skills. `/apply https://www.zhipin.com/job_detail/<id>.html` (or a liepin job URL) fetches the JD through the same session and, because the posting is Chinese, drafts a ctex resume, a ctex cover letter, and a short 打招呼语. Nothing is submitted for you.
+
+Limits, on purpose:
+
+- At most 20 results and 3 pages per command, with a few seconds between navigations.
+- Salary and experience are filtered on the parsed cards. City codes in the URL are a best-effort map and are marked unverified in each skill's `url-reference.md`.
+- A captcha or security check stops the command. There is no solver and no retry loop.
+- `greet` prints a draft. `--send` and `--batch` are refused. `--open <url>` shows that one page and waits for you to paste.
+- Selectors and XHR hints need a check against a logged-in browser; the fixtures are structural samples, not live page dumps. If a search returns empty or garbled fields, treat the parser as stale and update the fixture with the page you see.
+
+Profile fields for this market (期望城市, 期望薪资, 到岗时间, 学历) live in the `profile.local/` copies of `CLAUDE.md` and `01-candidate-profile.md`. `/setup` asks for them when you are targeting these boards and writes them only there.
+
+The confirm-before-record gate, the shared `job_search_tracker.csv` row, and the read-only Boss直聘 boundary are adapted from [JiemsLBJ/offer-harvester](https://github.com/JiemsLBJ/offer-harvester) (MIT). That project has no 猎聘 support and only read-only BOSS assist. This fork keeps both boards on that boundary: `greet` prints a draft, `--record` asks for an explicit yes before appending a `drafted` tracker row, and `--send` stays refused. Copyright and license notices are in the adapted files under `.agents/skills/_cn-browser/src/`.
+
+Another login-walled board (前程无忧, 拉勾) implements the `PortalAdapter` interface in `.agents/skills/_cn-browser/` and a thin `*-search` skill beside these two. `/add-portal` is still the right tool for a public, unauthenticated board.
+
+### 中文：Boss直聘与猎聘
+
+本 fork 增加了 Boss直聘（zhipin.com）和猎聘（www.liepin.com 与 c.liepin.com）。两家都没有公开职位 API，搜索和职位详情都走你自己登录过的浏览器（Playwright 持久化 profile，二维码或密码由你本人完成）。解析器用本地 fixture 测试，CI 不会访问网站。
+
+首次准备：
+
+```bash
+python3 tools/install_cn_browser.py
+bun run .agents/skills/zhipin-search/cli/src/cli.ts login
+bun run .agents/skills/liepin-search/cli/src/cli.ts login
+```
+
+`login` 会打开可见的浏览器窗口，你登录后在终端按回车。Cookie 在 `.browser-profiles/`，Playwright 在 `.browser-deps/`，两者都已 gitignore。不要把登录态提交到这个公开仓库。
+
+按关键词、城市、薪资、经验搜索：
+
+```bash
+bun run .agents/skills/zhipin-search/cli/src/cli.ts search -q "后端" -l "北京" --salary 20-40 --experience 3-5年 --limit 10
+```
+
+`/scrape` 会带上这两个门户。`/apply <职位 URL>` 拉取 JD；中文职位会自动用 ctex 模板生成中文简历、中文求职信，以及一段约 120 字的打招呼语。程序不会替你投递，也不会自动打招呼。`--send` 和 `--batch` 会直接拒绝。
+
+限制：
+
+- 每次命令最多 20 条、最多 3 页，翻页之间有数秒间隔。
+- 遇到验证码就停止，不绕过、不重试。
+- 城市代码和页面选择器来自公开资料，尚未在本环境用真实登录态核对。搜不到或字段错乱时，以你浏览器里看到的页面为准，更新 fixture 和 `url-reference.md`。
+- 个人资料只写在 gitignore 的 `profile.local/`。`/setup` 不会改被 Git 跟踪的模板。浏览器 profile、生成的简历和打招呼语也不要提交。
+- 确认关卡、追踪表，以及 Boss直聘只读、不自动打招呼的边界，改编自 [JiemsLBJ/offer-harvester](https://github.com/JiemsLBJ/offer-harvester)（MIT）。对方没有猎聘，Boss 也只做只读辅助。本 fork 对两个站点都保持这条边界。改编文件保留了 MIT 版权声明。
+
+以后要接前程无忧、拉勾，按 `.agents/skills/_cn-browser/README.md` 实现一个 `PortalAdapter` 即可。公开、无需登录的招聘站仍然用 `/add-portal`。
 
 For **country-agnostic** starting points outside Denmark, the repo ships two portal skills alongside the Danish demos:
 

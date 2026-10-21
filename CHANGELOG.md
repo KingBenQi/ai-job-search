@@ -15,6 +15,10 @@ per-file diff commands.
 
 ### Added
 
+- **Boss直聘 and 猎聘 search in this fork** (`.agents/skills/zhipin-search`, `.agents/skills/liepin-search`, `.agents/skills/_cn-browser`) - `/scrape` can filter by keyword, city, salary, and experience, and `/apply` can fetch a Chinese JD through the user's own logged-in browser. Parsers are tested on fixtures. The browser never solves a captcha and refuses to send 打招呼 or 投递. A Chinese posting drafts a ctex CV, a ctex cover letter, and a short greeting. The confirm gate and tracker row are adapted from JiemsLBJ/offer-harvester (MIT); both boards stay read-only.
+
+- **`/setup` writes personal data only under gitignored `profile.local/`** (`.claude/commands/setup.md`, `CLAUDE.md`, `README.md`, `SETUP.md`) - the previous command filled tracked templates (`CLAUDE.md`, the skill files, `cv/main_example.tex`, `search-queries.md`), which a public fork would publish on the next push. Those templates stay placeholders. `/apply`, `/expand`, `/scrape`, and `/reset` read and clear the local copies.
+
 - **CI runs the Python suite on Windows** (`.github/workflows/ci.yml` `python-tests-windows`) - every
   job ran on Ubuntu, so a Windows-only failure reached master with all checks green: #480's test
   (an atomic rename that Windows file locking refuses) and #486's (a tool printing non-ASCII JSON

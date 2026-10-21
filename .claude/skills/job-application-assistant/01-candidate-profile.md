@@ -1,5 +1,5 @@
 ---
-framework_version: 1.1.1
+framework_version: 1.1.2
 ---
 
 # Candidate Profile
@@ -26,6 +26,17 @@ a hard no, not a gap to smooth over. -->
 | Language | Level | Notes |
 |----------|-------|-------|
 | [LANGUAGE] | [LEVEL, e.g. "Native" / "C2" / "B1/B2 (conversational)"] | [optional] |
+
+## Job Search Preferences
+<!-- Chinese-market fields used by Boss直聘 / 猎聘 searches and by the ctex resume.
+     Leave the placeholders in place when you are not targeting that market. -->
+
+- **期望城市:** [YOUR_EXPECTED_CITIES]
+- **期望薪资:** [YOUR_EXPECTED_SALARY]
+- **到岗时间:** [YOUR_AVAILABILITY]
+- **学历:** [YOUR_HIGHEST_DEGREE]
+- **工作年限:** [YOUR_YEARS_OF_EXPERIENCE]
+- **求职状态:** [YOUR_JOB_SEARCH_STATUS]
 
 ## Education
 

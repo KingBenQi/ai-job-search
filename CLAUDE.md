@@ -1,7 +1,11 @@
 # Job Application Assistant for [YOUR_NAME]
 
-<!-- SETUP: This file is populated by running /setup -->
-<!-- After running /setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
+<!-- SETUP: /setup fills profile.local/CLAUDE.md. This tracked file stays a placeholder template. -->
+<!-- Do not replace [PLACEHOLDER] tokens here. Personal data belongs in profile.local/. -->
+
+## Where your profile lives
+
+`/setup` writes personal data only under `profile.local/` (gitignored). This tracked file stays a placeholder template. When `profile.local/CLAUDE.md` exists, read the Candidate Profile from that copy. The same split applies to `01-candidate-profile.md`, `02-behavioral-profile.md`, `04-job-evaluation.md`, `05-cv-templates.md`, `06-cover-letter-templates.md`, `07-interview-prep.md`, `search-queries.md`, and `cv/main_example.tex`: the filled file is the `profile.local/` copy. Write new facts only there. Never replace a placeholder in a tracked file with a real name, phone, email, employer, salary, or address.
 
 ## Role
 This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
@@ -13,7 +17,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup. You can also fill it in manually. -->
+<!-- The filled copy is profile.local/CLAUDE.md. Do not populate this tracked file. -->
 
 ### Identity
 - **Name:** [YOUR_NAME]
@@ -28,6 +32,13 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
   lower level than a posting wants is flagged for your own judgment, not auto-rejected. See
   04-job-evaluation.md's Language Gate. -->
 - **CV language:** [YOUR_CV_LANGUAGE] <!-- English unless your market expects otherwise; /setup asks -->
+
+### Chinese job-search preferences
+<!-- Asked by /setup when you target Boss直聘 / 猎聘 or write CVs in Chinese. Leave the placeholders otherwise. -->
+- **期望城市:** [YOUR_EXPECTED_CITIES]
+- **期望薪资:** [YOUR_EXPECTED_SALARY]
+- **到岗时间:** [YOUR_AVAILABILITY]
+- **学历:** [YOUR_HIGHEST_DEGREE]
 
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
 - **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
@@ -118,8 +129,8 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] Nice-to-have requirements are highlighted where there is a match
 
 ### Consistency
-- [ ] CV follows the standard 2-page moderncv/banking format
-- [ ] Cover letter uses cover.cls template and established structure
+- [ ] CV follows the standard 2-page moderncv/banking format, or the 2-page ctex format in `cv/main_zh_example.tex` when the CV is Chinese
+- [ ] Cover letter uses cover.cls template and established structure, or `cover_letters/cover_zh_example.tex` when the letter is Chinese
 - [ ] Tone is consistent across CV and cover letter
 - [ ] No contradictions between CV and cover letter content
 
@@ -133,11 +144,11 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 
 ### Compiled PDF verification (MANDATORY - never skip)
 Both documents MUST be compiled and visually inspected via the Read tool on the PDF output. "Looks fine in the .tex" is not acceptable - LaTeX page-break decisions are unpredictable. Iterate until these all pass:
-- [ ] CV compiled with **lualatex** (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors). Cover letter compiled with **xelatex** (cover.cls requires fontspec). If a custom template is active (registered via `/add-template`), compile with its declared command instead — see the `ACTIVE-TEMPLATE` block in `05-cv-templates.md`/`06-cover-letter-templates.md`.
+- [ ] CV compiled with **lualatex** (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors). Cover letter compiled with **xelatex** (cover.cls requires fontspec). A Chinese CV and a Chinese cover letter are both compiled with **xelatex** on the ctex templates. If a custom template is active (registered via `/add-template`), compile with its declared command instead — see the `ACTIVE-TEMPLATE` block in `05-cv-templates.md`/`06-cover-letter-templates.md`.
 - [ ] **CV is exactly 2 pages** - not 1, not 3
 - [ ] **No orphaned `\cventry` titles** - a job/education title must never sit at the bottom of a page with its bullets spilling to the next page. Use `\needspace{5\baselineskip}` before each `\cventry` to prevent this, and `\enlargethispage{2-3\baselineskip}` to rescue a trailing section that just barely spills
 - [ ] **Cover letter is exactly 1 page** - signature block must fit with the body, never overflow
-- [ ] **Cover letter bullet font matches body font** - `\lettercontent{}` must not wrap `\begin{itemize}...\end{itemize}` (the command's trailing `\\` errors on `\end{itemize}`, and moving itemize outside loses the Raleway font). Standard pattern: close `\lettercontent{}`, then wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`
+- [ ] **Cover letter bullet font matches body font** - `\lettercontent{}` must not wrap `\begin{itemize}...\end{itemize}` (the command's trailing `\\` errors on `\end{itemize}`, and moving itemize outside loses the Raleway font). Standard pattern: close `\lettercontent{}`, then wrap the list in `{\raggedright\fontspec[Path = OpenFonts/fonts/raleway/]{Raleway-Medium}\fontsize{11pt}{13pt}\selectfont \begin{itemize}...\end{itemize}\par}`. A Chinese ctex letter does not use this wrapper; ctex sets the font for the whole page.
 
 ### ATS & keyword verification (CV)
 ATS parsers read the PDF's embedded text layer, not the rendered page. Extract it with `python3 tools/verify_pdf.py cv/main_<company>_<role>.pdf --dump-text cv/main_<company>_<role>.txt` (pypdf, then `pdftotext -layout -enc UTF-8`) and verify what a parser sees. If both extractors are missing, skip the parseability items with a warning and check keyword coverage from the visual PDF read instead.
